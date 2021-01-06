@@ -99,17 +99,17 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             return;
         }
         if(age.isEmpty()){
-            et_age.setError("이름을 입력하세요!");
+            et_age.setError("나이를 입력하세요!");
             et_age.requestFocus();
             return;
         }
         if(pwd.isEmpty()){
-            et_pwd.setError("이름을 입력하세요!");
+            et_pwd.setError("비밀번호를 입력하세요!");
             et_pwd.requestFocus();
             return;
         }
         if(pwd2.isEmpty()){
-            et_pwd_check.setError("이름을 입력하세요!");
+            et_pwd_check.setError("비밀번호를 입력하세요!");
             et_pwd_check.requestFocus();
             return;
         }
