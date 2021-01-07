@@ -1,12 +1,9 @@
 package com.example.chattingapp;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
@@ -20,7 +17,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -30,24 +26,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText et_id, et_pwd;
     private ProgressBar progressBar;
 
-    private FirebaseRemoteConfig mFirebaseRemoteConfig;
     private FirebaseAuth mAuth;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        String splash_background = mFirebaseRemoteConfig.getString("splash_background");
-
-        //StatusBar의 색상을 변경하는 코드이다 버전 lollipop부터
-        //사용가능하기때문에 이런식으로 버전에 해당할경우 이코드를 적용시키도록 설정한다.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setStatusBarColor(Color.parseColor(splash_background));
-        }
 
         mAuth = FirebaseAuth.getInstance();
+
+        find_pwd = (TextView)findViewById(R.id.find_pwd);
+        et_id = (EditText)findViewById(R.id.login_id);
+        et_pwd = (EditText)findViewById(R.id.login_password);
+        progressBar = (ProgressBar)findViewById(R.id.login_progressbar);
 
         login = (Button) findViewById(R.id.login_button);
         login.setOnClickListener(this);
@@ -55,11 +46,11 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         register = (Button) findViewById(R.id.register_button);
         register.setOnClickListener(this);
 
-        find_pwd = (TextView)findViewById(R.id.find_pwd);
-        et_id = (EditText)findViewById(R.id.login_id);
-        et_pwd = (EditText)findViewById(R.id.login_password);
-        progressBar = (ProgressBar)findViewById(R.id.login_progressbar);
+        getLoginInfo();
 
+    }// End of OnCreate
+
+    private void getLoginInfo() {
         //회원 가입이 성공할경우 intent객체를 통해 돌아온 데이터들을 추출하여
         //id와 password 정보를 입력한다.
         Intent intent = getIntent();
@@ -69,10 +60,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         et_id.setText(id);
         et_pwd.setText(pwd);
-
-
-
-    }// End of OnCreate
+    }
 
     @Override
     public void onClick(View v) {
@@ -118,7 +106,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 if(task.isSuccessful()){
                     Toast.makeText(LoginActivity.this, "성공적으로 로그인 하였습니다.", Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.GONE);
-                    startActivity(new Intent(LoginActivity.this, ProfileActivity.class));
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
 
                 }
                 else{

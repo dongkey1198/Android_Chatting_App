@@ -20,8 +20,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 //2020-01-06
@@ -30,6 +32,7 @@ import java.util.regex.Pattern;
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener{
 
     private FirebaseAuth mAuth;
+    private DatabaseReference reference;
 
     private EditText et_email, et_pwd, et_pwd_check, et_name, et_age;
     private Button login_button, register_button;
@@ -82,6 +85,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         String age = et_age.getText().toString().trim();
         String pwd = et_pwd.getText().toString().trim();
         String pwd2 = et_pwd_check.getText().toString().trim();
+        String imageURL = "default";
 
         if(email.isEmpty()){
             et_email.setError("이메일을 입력하세요!");
@@ -131,7 +135,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
-                            User user = new User(name, age, email);
+                            User user = new User(name, age, email, imageURL);
+
                             FirebaseDatabase.getInstance().getReference("Users")
                                     .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                     .setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -160,8 +165,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                         }
                     }
                 });
-
-
     }
 
 }
