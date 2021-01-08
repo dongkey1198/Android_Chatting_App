@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfileFragment">
+    tools:context=".SettingActivity">
 
     <TextView
         android:layout_width="match_parent"
@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:textSize="40sp"
-        android:text="프로필"
+        android:text="프로필 수정"
         android:textColor="@color/white"
         android:textStyle="bold"
         android:layout_marginTop="10dp"/>
@@ -64,13 +64,14 @@
         android:textStyle="bold"
         android:layout_below="@+id/profile_email"/>
 
-    <TextView
+    <EditText
         android:id="@+id/profile_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
         android:textSize="20sp"
+        android:inputType="text"
         android:layout_below="@+id/name"/>
 
     <TextView
@@ -85,7 +86,7 @@
         android:textStyle="bold"
         android:layout_below="@+id/profile_name"/>
 
-    <TextView
+    <EditText
         android:id="@+id/profile_age"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -104,54 +105,43 @@
         android:text="전화 번호: "
         android:textSize="20sp"
         android:textStyle="bold"
+        android:inputType="text"
         android:layout_below="@+id/profile_age"/>
 
-    <TextView
+    <EditText
         android:id="@+id/profile_phone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
         android:textSize="20sp"
+        android:inputType="phone"
         android:layout_below="@+id/phone"/>
 
-
     <Button
-        android:id="@+id/profile_edit_button"
+        android:id="@+id/profile_edit_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="50dp"
         android:backgroundTint="@color/main_color"
-        android:text="프로필 수정"
+        android:text="프로필 수정 완료"
         android:textColor="@color/white"
         android:textSize="20sp"
         android:layout_below="@+id/profile_phone"/>
 
+
     <Button
-        android:id="@+id/change_password"
+        android:id="@+id/profile_exit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:backgroundTint="@color/main_color"
-        android:text="비밀번호 변경"
+        android:text="돌아가기"
         android:textColor="@color/white"
         android:textSize="20sp"
-        android:layout_below="@+id/profile_edit_button"/>
-
-    <Button
-        android:id="@+id/logout_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:backgroundTint="@color/main_color"
-        android:text="로그아웃"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:layout_below="@+id/change_password"/>
-
+        android:layout_below="@+id/profile_edit_btn"/>
 
 </RelativeLayout>

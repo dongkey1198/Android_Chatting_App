@@ -86,6 +86,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         String pwd = et_pwd.getText().toString().trim();
         String pwd2 = et_pwd_check.getText().toString().trim();
         String imageURL = "default";
+        String phone_num = "1";
 
         if(email.isEmpty()){
             et_email.setError("이메일을 입력하세요!");
@@ -135,7 +136,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
-                            User user = new User(name, age, email, imageURL);
+                            User user = new User(name, age, email, imageURL, phone_num);
 
                             FirebaseDatabase.getInstance().getReference("Users")
                                     .child(FirebaseAuth.getInstance().getCurrentUser().getUid())

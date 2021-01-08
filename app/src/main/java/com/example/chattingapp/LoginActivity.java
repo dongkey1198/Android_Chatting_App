@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -104,6 +105,20 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             public void onComplete(@NonNull Task<AuthResult> task) {
 
                 if(task.isSuccessful()){
+
+//                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//
+//                    if(user.isEmailVerified()){
+//                        Toast.makeText(LoginActivity.this, "성공적으로 로그인 하였습니다.", Toast.LENGTH_SHORT).show();
+//                        progressBar.setVisibility(View.GONE);
+//                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+//                    }
+//                    else{
+//                        user.sendEmailVerification();
+//                        Toast.makeText(LoginActivity.this, "이메일 인증이 필요합니다.", Toast.LENGTH_SHORT).show();
+//                        progressBar.setVisibility(View.GONE);
+//                    }
+
                     Toast.makeText(LoginActivity.this, "성공적으로 로그인 하였습니다.", Toast.LENGTH_SHORT).show();
                     progressBar.setVisibility(View.GONE);
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
