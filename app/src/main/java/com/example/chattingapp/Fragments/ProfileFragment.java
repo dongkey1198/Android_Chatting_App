@@ -1,4 +1,4 @@
-package com.example.chattingapp;
+package com.example.chattingapp.Fragments;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -9,7 +9,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import android.renderscript.Sampler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +16,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.chattingapp.LoginActivity;
+import com.example.chattingapp.R;
+import com.example.chattingapp.SettingActivity;
+import com.example.chattingapp.Models.User;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -28,10 +31,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
-
-import org.w3c.dom.Text;
-
-import java.util.EventListener;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -84,9 +83,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         //로그아웃
         logout_btn = (Button)view.findViewById(R.id.logout_button);
         logout_btn.setOnClickListener(this);
-
         getUserData();
-
         return view;
     }
 
@@ -114,17 +111,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
                     storage = FirebaseStorage.getInstance();
                     storageReference = storage.getReference();
-
-                    if(user_image.equals("default")){
-                        storageReference.child("default_profile_img/default_img.png")
-                                .getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                            @Override
-                            public void onSuccess(Uri uri) {
-                                Picasso.get().load(uri).into(profile_image);
-                            }
-                        });
-                    }
-
                     storageReference.child(user_image).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                         @Override
                         public void onSuccess(Uri uri) {
@@ -145,7 +131,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             }
         });
     }
-
 
     @Override
     public void onClick(View v) {

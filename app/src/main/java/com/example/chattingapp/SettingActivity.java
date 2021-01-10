@@ -24,13 +24,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -49,6 +53,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     private static final int REQEUST_CODE_CAPTURE_IMAGE = 3;
 
     private FirebaseUser user;
+    private String userID;
     private DatabaseReference reference;
     private FirebaseStorage storage;
     private StorageReference storageReference;
@@ -62,6 +67,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
 
     private Uri imageUri;
     private String _email, _name, _age, _image,  _phone;
+    private String current_img;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +87,9 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
 
         back = (Button)findViewById(R.id.profile_exit);
         back.setOnClickListener(this);
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        userID = user.getUid();
 
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
@@ -221,15 +230,10 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         user_profile.put("phone_num", _phone);
         user_profile.put("imageURL", _image);
 
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        String userID = user.getUid();
-
         reference = FirebaseDatabase.getInstance().getReference("Users");
         reference.child(userID).updateChildren(user_profile);
 
         Toast.makeText(this, "프로필이 업데이트 되었습니다.", Toast.LENGTH_SHORT).show();
-//        Intent intent = new Intent(SettingActivity.this, MainActivity.class);
-//        startActivity(intent);
         finish();
 
     }
@@ -237,13 +241,15 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     private void upLoadImg() {
 
         if(imageUri == null){
-            _image = "default";
+            // 사진 업데이트가 없을때
+           _image = current_img;
         }
         else{
             final String randomKey = UUID.randomUUID().toString();
             _image = "images/"+randomKey;
             StorageReference riversRef = storageReference.child("images/" +randomKey);
             riversRef.putFile(imageUri);
+            return;
         }
     }
 
@@ -257,15 +263,19 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         String image = intent.getStringExtra("image");
         String phone = intent.getStringExtra("phone");
 
-        if(image.equals("default")){
-            storageReference.child("default_profile_img/default_img.png")
-                    .getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                @Override
-                public void onSuccess(Uri uri) {
-                    Picasso.get().load(uri).into(profile_image);
-                }
-            });
-        }
+        // 사진 업데이트 가없을때
+        current_img = image;
+        //
+
+        StorageReference ref = FirebaseStorage.getInstance().getReference().child(image);
+
+
+//        storageReference.child(image).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+//            @Override
+//            public void onSuccess(Uri uri) {
+//                Picasso.get().load(uri).into(profile_image);
+//            }
+//        });
 
         profile_email.setText(email);
         profile_name.setText(name);

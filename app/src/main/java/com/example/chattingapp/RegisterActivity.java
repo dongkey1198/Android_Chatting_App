@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.media.MediaCodec;
 import android.os.Bundle;
 
 import android.util.Patterns;
@@ -15,6 +14,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 
+import com.example.chattingapp.Models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -24,7 +24,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 //2020-01-06
 //파이어베이스 Real Time Database 와 Authentication 을 이용하여 Register page 및 기능 구현
@@ -32,7 +31,6 @@ import java.util.regex.Pattern;
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener{
 
     private FirebaseAuth mAuth;
-    private DatabaseReference reference;
 
     private EditText et_email, et_pwd, et_pwd_check, et_name, et_age;
     private Button login_button, register_button;
@@ -93,37 +91,37 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             et_email.requestFocus();
             return;
         }
-        if(!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+        else if(!Patterns.EMAIL_ADDRESS.matcher(email).matches()){
             et_email.setError("형식이 올바르지 않습니다.");
             et_email.requestFocus();
             return;
         }
-        if(name.isEmpty()){
+        else if(name.isEmpty()){
             et_name.setError("이름을 입력하세요!");
             et_name.requestFocus();
             return;
         }
-        if(age.isEmpty()){
+        else if(age.isEmpty()){
             et_age.setError("나이를 입력하세요!");
             et_age.requestFocus();
             return;
         }
-        if(pwd.isEmpty()){
+        else if(pwd.isEmpty()){
             et_pwd.setError("비밀번호를 입력하세요!");
             et_pwd.requestFocus();
             return;
         }
-        if(pwd2.isEmpty()){
+        else if(pwd2.isEmpty()){
             et_pwd_check.setError("비밀번호를 입력하세요!");
             et_pwd_check.requestFocus();
             return;
         }
-        if(!pwd.equals(pwd2)){
+        else if(!pwd.equals(pwd2)){
             et_pwd.setError("입력한 비밀번호가 일치하지 않습니다.");
             et_pwd.requestFocus();
             return;
         }
-        if(pwd.length()<6){
+        else if(pwd.length() < 6){
             et_pwd.setError("비밀번호는 6자리 이상이어야 합니다");
             et_pwd.requestFocus();
             return;
@@ -136,6 +134,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
+
                             User user = new User(name, age, email, imageURL, phone_num);
 
                             FirebaseDatabase.getInstance().getReference("Users")

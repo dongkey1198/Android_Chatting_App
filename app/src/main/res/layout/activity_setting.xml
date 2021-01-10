@@ -29,7 +29,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="75dp"
         android:layout_marginBottom="10dp"
-        android:src="@drawable/ic_launcher_background" />
+        android:src="@drawable/default_img" />
 
     <TextView
         android:id="@+id/email"

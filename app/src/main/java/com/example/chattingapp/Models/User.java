@@ -1,4 +1,4 @@
-package com.example.chattingapp;
+package com.example.chattingapp.Models;
 
 public class User {
 
