@@ -94,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 User user = snapshot.getValue(User.class);
                 user_name.setText(user.getName());
+
                 if(user.getImageURL().equals("default")){
                     profile_imgae.setImageResource(R.drawable.default_img);
                 }
@@ -107,6 +108,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-    }
+   }
 
 }

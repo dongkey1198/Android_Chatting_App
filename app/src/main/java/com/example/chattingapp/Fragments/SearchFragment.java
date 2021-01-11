@@ -10,7 +10,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.chattingapp.Adapter.UserAdapter;
 import com.example.chattingapp.Models.User;
 import com.example.chattingapp.R;
@@ -24,6 +26,14 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
+
+// 가입된 사용자들을 보여주는 페이지(**검색기능 추가할 예정)
+// Firebase Real Time Database 안에 존재하는 모든 User 정보를 부러온다
+// FirebaseAuth.getInstance.getCurrentUser()를 사용하여 현재 로그인 상태인 사용자를 제외한
+// 나머지 사용자 정보를 모두 ArrayList에 담은후 UserAdapter로 본내다
+// 그후 RecyclerView를 통해 모두 UI에 나오게한다.
 
 public class SearchFragment extends Fragment {
 
@@ -45,8 +55,8 @@ public class SearchFragment extends Fragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        mUsers = new ArrayList<>();
 
+        mUsers = new ArrayList<>();
         getUsers();
 
         return view;
@@ -73,6 +83,7 @@ public class SearchFragment extends Fragment {
                         mUsers.add(user);
                     }
                 }
+
                 userAdapter = new UserAdapter(getContext(), mUsers);
                 recyclerView.setAdapter(userAdapter);
             }
