@@ -2,15 +2,42 @@ package com.example.chattingapp.Fragments;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.chattingapp.Adapter.UserAdapter;
+import com.example.chattingapp.Models.Chat;
+import com.example.chattingapp.Models.User;
 import com.example.chattingapp.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChatFragment extends Fragment {
+
+    private RecyclerView recyclerView;
+
+    private UserAdapter userAdapter;
+    private List<User> mUser;
+
+    private FirebaseUser fuser;
+    private DatabaseReference reference;
+
+    private List<String> userList;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -20,6 +47,85 @@ public class ChatFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_chat, container, false);
+        View view = inflater.inflate(R.layout.fragment_chat, container, false);
+
+        recyclerView = (RecyclerView)view.findViewById(R.id.recyler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        fuser = FirebaseAuth.getInstance().getCurrentUser();
+
+        userList = new ArrayList<>();
+
+        reference = FirebaseDatabase.getInstance().getReference("Chats");
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                userList.clear();
+                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
+                    Chat chat = dataSnapshot.getValue(Chat.class);
+
+                    //사용자가 메시지를 보냈을때
+                    if(chat.getSender().equals(fuser.getUid())){
+                        userList.add(chat.getReceiver());
+                    }
+                    //사용자가 메시지를 받았을때때
+                   else if(chat.getReceiver().equals(fuser.getUid())){
+                        userList.add(chat.getSender());
+                    }
+                }
+                readChats();
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        return  view;
+    }
+
+    private void readChats() {
+
+        mUser = new ArrayList<>();
+        reference = FirebaseDatabase.getInstance().getReference("Users");
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                mUser.clear(); // 0으로 초기화
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                    User user = dataSnapshot.getValue(User.class);
+                    //중복된 값 해결
+                    for(String id : userList){
+                        if(user.getUserId().equals(id)){
+                            if(mUser.size() != 0){
+                                //중복 방지
+                                for( User user1 : mUser){
+                                    if(!user.getUserId().equals(user1.getUserId())){
+                                        mUser.add(user);
+                                    }
+                                }
+                            }
+                            else{
+                                mUser.add(user);
+                            }
+                        }
+                    }
+                }
+
+                userAdapter = new UserAdapter(getContext(), mUser);
+                recyclerView.setAdapter(userAdapter);
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 }
