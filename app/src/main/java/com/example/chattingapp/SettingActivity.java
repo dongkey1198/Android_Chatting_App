@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -16,8 +17,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.EventLog;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -25,8 +29,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -37,10 +43,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
+import java.util.Base64;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -52,22 +64,20 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     private static final int REQEUST_CODE_SELECT_IMAGE = 2;
     private static final int REQEUST_CODE_CAPTURE_IMAGE = 3;
 
-    private FirebaseUser user;
-    private String userID;
-    private DatabaseReference reference;
-    private FirebaseStorage storage;
-    private StorageReference storageReference;
-
-
     private TextView profile_email;
     private EditText profile_name, profile_age, profile_phone_num;
     private CircleImageView profile_image;
-    private Button back, profile_edit_button;
+    private Button back_button, profile_edit_button;
     private Dialog dialog;
 
+    private DatabaseReference reference;
+    private FirebaseUser fuser;
+    private FirebaseStorage storage;
+    private StorageReference storageReference;
     private Uri imageUri;
-    private String _email, _name, _age, _image,  _phone;
-    private String current_img;
+    private Uri downloadUri;
+    private Uri currentUri;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,23 +89,39 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         profile_age = (EditText)findViewById(R.id.profile_age);
         profile_phone_num = (EditText)findViewById(R.id.profile_phone);
 
-        profile_image = (CircleImageView)findViewById(R.id.profile_image);
-        profile_image.setOnClickListener(this);
-
-        profile_edit_button = (Button)findViewById(R.id.profile_edit_btn);
-        profile_edit_button.setOnClickListener(this);
-
-        back = (Button)findViewById(R.id.profile_exit);
-        back.setOnClickListener(this);
-
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        userID = user.getUid();
-
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
 
+        // 이미지 클릭시 다이얼로그 나옴
+        profile_image = (CircleImageView)findViewById(R.id.profile_image);
+        profile_image.setOnClickListener(this);
 
+        //수정 완료후 업데이트
+        profile_edit_button = (Button)findViewById(R.id.profile_edit_btn);
+        profile_edit_button.setOnClickListener(this);
+
+        // 이전페이지로 돌아가기
+        back_button = (Button)findViewById(R.id.profile_exit);
+        back_button.setOnClickListener(this);
+
+        //기존 데이터 가져오기
         getCurrentData();
+        getPerMissions();
+    }
+
+    private void getPerMissions() {
+        //앨범에서 이미지를 가져오려면 External Stroage에 접속할수있게 권한을 줘야한다.
+        if(ContextCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(SettingActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQEUST_CODE_STORAGE_PERMISSION);
+        }
+
+        if(ContextCompat.checkSelfPermission(SettingActivity.this,
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(SettingActivity.this, new String[]{Manifest.permission.CAMERA}, REQEUST_CODE_STORAGE_PERMISSION);
+        }
+
     }
 
     @Override
@@ -115,7 +141,6 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-
     //다이얼로그를 통해 앨범에서 이미지를 업데결정
     //카메라를 통해 이미지를 업데이트 할건지 결정
     private void getImageUpdateDialog() {
@@ -128,41 +153,43 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         dialog.setContentView(R.layout.custom_dialogg);
         dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
 
+        //디바이스 앨범에서 사진읽어오기
         ImageView album = (ImageView)dialog.findViewById(R.id.album);
         album.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //앨범에서 이미지를 가져오려면 External Stroage에 접속할수있게 권한을 줘야한다.
-                if(ContextCompat.checkSelfPermission(getApplicationContext(),
-                        Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(SettingActivity.this,
-                            new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},REQEUST_CODE_STORAGE_PERMISSION);
-                } else{
-                    selectImage();
-                }
+               openImage();
             }
         });
 
+        // 카메라를 통해 사진 읽어오기
         ImageView camera = (ImageView)dialog.findViewById(R.id.camera);
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if(intent.resolveActivity(getPackageManager()) != null){
-                    startActivityForResult(intent, REQEUST_CODE_CAPTURE_IMAGE);
-                }
+                captureImage();
             }
         });
 
+        //customDialog 보여주기
         dialog.show();
-
 
     }
 
-    private void selectImage() {
+    //앨범에서 이미지 가져오기
+    private void openImage(){
+
         Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         if(intent.resolveActivity(getPackageManager()) != null){
             startActivityForResult(intent, REQEUST_CODE_SELECT_IMAGE);
+        }
+    }
+
+    private void captureImage() {
+
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if(intent.resolveActivity(getPackageManager()) != null){
+            startActivityForResult(intent, REQEUST_CODE_CAPTURE_IMAGE);
         }
     }
 
@@ -170,91 +197,102 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == REQEUST_CODE_SELECT_IMAGE && resultCode == RESULT_OK){
-            if(data != null){
-                //Uri selectedImage = data.getData();
-                imageUri = data.getData();
-                if(imageUri != null){
-                    try{
+        if(requestCode == REQEUST_CODE_SELECT_IMAGE && data != null && data.getData() != null){
 
-                        InputStream inputStream = getContentResolver().openInputStream(imageUri);
-                        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                        profile_image.setImageBitmap(bitmap);
-                        dialog.dismiss();
+            imageUri = data.getData();
+            Log.d("mylog", "albume: " + imageUri);
+            profile_image.setImageURI(imageUri);
+            dialog.dismiss();
 
-                    }catch (Exception e){
-                        Toast.makeText(SettingActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
+            uploadPicture();
+
         }
         else if(requestCode == REQEUST_CODE_CAPTURE_IMAGE && resultCode == RESULT_OK){
 
-            if(data != null){
-                //수정해야함
-                imageUri = data.getData();
+            Bitmap image = (Bitmap)data.getExtras().get("data");
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            image.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            byte b[] = stream.toByteArray();
+            profile_image.setImageBitmap(image);
 
-                Bundle capturedImage = data.getExtras();
-                Bitmap bitmap = (Bitmap)capturedImage.get("data");
-                profile_image.setImageBitmap(bitmap);
-                dialog.dismiss();
-            }
+            final String randomKey = UUID.randomUUID().toString();
+            StorageReference riversRef = storageReference.child("images/" + randomKey);
+            riversRef.putBytes(b).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    taskSnapshot.getMetadata().getReference().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            Log.d("mylog", "uri: " + uri);
+                            imageUri = uri;
+                        }
+                    });
+                }
+            });
+
+            dialog.dismiss();
 
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    //Firebase Storage에 이미지 저장
+    private void uploadPicture() {
 
-        if(requestCode == REQEUST_CODE_STORAGE_PERMISSION && grantResults.length > 0){
-            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                selectImage();
-            }else{
-                Toast.makeText(SettingActivity.this, "권한이 필요합니다.", Toast.LENGTH_SHORT).show();
-            }
-        }
+        final String randomKey = UUID.randomUUID().toString();
+        StorageReference riversRef = storageReference.child("images/" + randomKey);
+        riversRef.putFile(imageUri)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+
+                    }
+                });
     }
+
+    //사용자 정보 업데이트
     private void upDateUserInfo() {
 
-        upLoadImg();
-        _email = profile_email.getText().toString();
-        _name = profile_name.getText().toString();
-        _age = profile_age.getText().toString();
-        _phone = profile_phone_num.getText().toString();
-
-        HashMap<String, Object> user_profile = new HashMap<String, Object>();
-        user_profile.put("email", _email);
-        user_profile.put("name", _name);
-        user_profile.put("age", _age);
-        user_profile.put("phone_num", _phone);
-        user_profile.put("imageURL", _image);
-
-        reference = FirebaseDatabase.getInstance().getReference("Users");
-        reference.child(userID).updateChildren(user_profile);
-
-        Toast.makeText(this, "프로필이 업데이트 되었습니다.", Toast.LENGTH_SHORT).show();
-        finish();
-
-    }
-
-    private void upLoadImg() {
-
         if(imageUri == null){
-            // 사진 업데이트가 없을때
-           _image = current_img;
+            imageUri = currentUri;
         }
-        else{
-            final String randomKey = UUID.randomUUID().toString();
-            _image = "images/"+randomKey;
-            StorageReference riversRef = storageReference.child("images/" +randomKey);
-            riversRef.putFile(imageUri);
-            return;
-        }
+
+        fuser = FirebaseAuth.getInstance().getCurrentUser();
+        reference = FirebaseDatabase.getInstance().getReference("Users");
+        reference.child(fuser.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                String imguri = imageUri.toString();
+                Log.d("mylog", "imguri: " + imguri);
+
+                HashMap<String, Object> hashMap = new HashMap<>();
+                hashMap.put("imageURL", imguri);
+                hashMap.put("name", profile_name.getText().toString());
+                hashMap.put("age", profile_age.getText().toString());
+                hashMap.put("phone_num", profile_phone_num.getText().toString());
+
+                reference.child(fuser.getUid()).updateChildren(hashMap);
+
+                Toast.makeText(SettingActivity.this, "프로필 수정 완료", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
+    // 기존의 사용자 정보를 ProfileFragment 로 부터 전달받아 화면에 출력한다.
     private void getCurrentData() {
-
         Intent intent = getIntent();
 
         String email = intent.getStringExtra("email");
@@ -263,20 +301,15 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         String image = intent.getStringExtra("image");
         String phone = intent.getStringExtra("phone");
 
-        // 사진 업데이트 가없을때
-        current_img = image;
-        //
+        Uri imguri = Uri.parse(image);
+        currentUri = imguri;
 
-        StorageReference ref = FirebaseStorage.getInstance().getReference().child(image);
-
-
-//        storageReference.child(image).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//            @Override
-//            public void onSuccess(Uri uri) {
-//                Picasso.get().load(uri).into(profile_image);
-//            }
-//        });
-
+        if(image.equals("default")){
+                profile_image.setImageResource(R.drawable.default_img);
+        }
+        else{
+            Glide.with(SettingActivity.this).load(imguri).into(profile_image);
+        }
         profile_email.setText(email);
         profile_name.setText(name);
         profile_age.setText(age);
