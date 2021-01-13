@@ -38,12 +38,12 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
      protected void onStart() {
          super.onStart();
 
-         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-
-         if(firebaseUser != null){
-             startActivity(new Intent(SplashActivity.this, MainActivity.class));
-             finish();
-         }
+//         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+//
+//         if(firebaseUser != null){
+//             startActivity(new Intent(SplashActivity.this, MainActivity.class));
+//             finish();
+//         }
 
      }
 

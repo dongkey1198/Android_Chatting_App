@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.chattingapp.LoginActivity;
 import com.example.chattingapp.R;
 import com.example.chattingapp.SettingActivity;
@@ -30,21 +31,28 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
 import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
 
+    private static final int IMAGE_REQUEST = 1;
+
+
+
     private Button logout_btn, profile_edit_button;
     private TextView profile_email, profile_name, profile_age, profile_phone_num;
     private CircleImageView profile_image;
 
-    private FirebaseUser user;
+    private FirebaseUser fuser;
     private DatabaseReference reference;
 
     private FirebaseStorage storage;
     private StorageReference storageReference;
+    private StorageTask uploadTask;
+    private Uri imageUri;
 
     private String userID;
 
@@ -66,8 +74,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
 
         //파이어베이스에서 사용자 유니크 아이디 가져오기기
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        userID = user.getUid(); // current user Id
+        fuser = FirebaseAuth.getInstance().getCurrentUser();
+        userID = fuser.getUid(); // current user Id
 
         reference = FirebaseDatabase.getInstance().getReference("Users");
 
@@ -109,14 +117,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     user_image = userProfile.getImageURL();
                     user_phone_num = userProfile.getPhone_num();
 
-                    storage = FirebaseStorage.getInstance();
-                    storageReference = storage.getReference();
-                    storageReference.child(user_image).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            Picasso.get().load(uri).into(profile_image);
-                        }
-                    });
+                    if (userProfile.getImageURL().equals("default")){
+                        profile_image.setImageResource(R.drawable.default_img);
+                    }
+                    else{
+                        Glide.with(getActivity()).load(user_image).into(profile_image);
+                    }
+
+
                     profile_name.setText(user_name);
                     profile_age.setText(user_age);
                     profile_email.setText(user_email);
