@@ -2,6 +2,7 @@ package com.example.chattingapp.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,6 +67,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             holder.profile_image.setImageResource(R.drawable.default_img);
         }
         else{
+            Log.d("mylog", "aaa: " + imageurl);
             Glide.with(context).load(imageurl).into(holder.profile_image);
         }
 

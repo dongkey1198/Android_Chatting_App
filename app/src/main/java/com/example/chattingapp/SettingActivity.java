@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -70,6 +71,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     private static final int CAMERA_PERM_CODE = 101;
     public static final int CAMERA_REQUEST_CODE = 102;
     public static final int GALLERY_REQUEST_CODE = 103;
+    public static final int REQUEST_CODE_STORAGE_PERMISSION = 104;
 
     private String currentPhotoPath;
 
@@ -79,11 +81,12 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     private Button back_button, profile_edit_button;
     private Dialog dialog;
 
-    private DatabaseReference reference;
     private FirebaseUser fuser;
     private StorageReference storageReference;
-    private Uri imageUri;
-    private Uri currentUri;
+    private StorageTask uploadTask;
+    //private Uri imageUri;
+    private String currentUri;
+    private String mUri;
 
 
     @Override
@@ -153,8 +156,12 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         album.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent gallary = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(gallary, GALLERY_REQUEST_CODE);
+                if(ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                    ActivityCompat.requestPermissions(SettingActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE_STORAGE_PERMISSION);
+                }
+                else{
+                    selectImage();
+                }
             }
         });
 
@@ -167,6 +174,13 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
             }
         });
 
+    }
+
+    private void selectImage() {
+        Intent gallary = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        if(gallary.resolveActivity(getPackageManager()) != null){
+            startActivityForResult(gallary, GALLERY_REQUEST_CODE);
+        }
     }
 
     private void askCameraPermissions() {
@@ -185,9 +199,10 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         if(requestCode == CAMERA_REQUEST_CODE){
             if(resultCode == Activity.RESULT_OK){
                 File f = new File(currentPhotoPath);
+
                 profile_image.setImageURI(Uri.fromFile(f));
                 Uri contentUri = Uri.fromFile(f);
-                imageUri = contentUri;
+                //imageUri = contentUri;
                 Log.d("Mylog", "Absolute Url of Captured Image: " + Uri.fromFile(f));
 
                 uploadImageToFirebase(f.getName(), contentUri);
@@ -197,7 +212,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         else if(requestCode == GALLERY_REQUEST_CODE){
             if(resultCode == Activity.RESULT_OK){
                 Uri contentUri = data.getData();
-                imageUri = contentUri;
+                //imageUri = contentUri;
                 String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
                 String imageFileName = "JPEG_" + timeStamp + "." + getFileExt(contentUri);
                 profile_image.setImageURI(contentUri);
@@ -266,9 +281,19 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                 Toast.makeText(this, "카메라 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
             }
         }
+        else if(grantResults.length > 0 &&requestCode == REQUEST_CODE_STORAGE_PERMISSION){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                selectImage();
+            }
+            else{
+                Toast.makeText(this, "권한이 필요합니다.", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void uploadImageToFirebase(String imageFileName, Uri contentUri) {
+        //mUri = contentUri.toString();
+        mUri = contentUri.toString();
         StorageReference image = storageReference.child("images/" + imageFileName);
         image.putFile(contentUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
@@ -277,6 +302,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                     @Override
                     public void onSuccess(Uri uri) {
                         Log.d("Mylog", "Successfully uploaded an image on Firebase Storage" + uri.toString());
+
                     }
                 });
             }
@@ -286,35 +312,25 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     //사용자 정보 업데이트
     private void upDateUserInfo() {
 
-        if(imageUri == null){
-            imageUri = currentUri;
+        if(mUri == null){
+            mUri = currentUri;
         }
+        else{
 
-        fuser = FirebaseAuth.getInstance().getCurrentUser();
-        reference = FirebaseDatabase.getInstance().getReference("Users");
-        reference.child(fuser.getUid()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
+            fuser = FirebaseAuth.getInstance().getCurrentUser();
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
+            Log.d("mylog", "imguri: " + mUri);
 
-                String imguri = imageUri.toString();
-                Log.d("mylog", "imguri: " + imguri);
+            HashMap<String, Object> hashMap = new HashMap<>();
+            hashMap.put("imageURL", mUri);
+            hashMap.put("name", profile_name.getText().toString());
+            hashMap.put("age", profile_age.getText().toString());
+            hashMap.put("phone_num", profile_phone_num.getText().toString());
 
-                HashMap<String, Object> hashMap = new HashMap<>();
-                hashMap.put("imageURL", imguri);
-                hashMap.put("name", profile_name.getText().toString());
-                hashMap.put("age", profile_age.getText().toString());
-                hashMap.put("phone_num", profile_phone_num.getText().toString());
-
-                reference.child(fuser.getUid()).updateChildren(hashMap);
-
-                Toast.makeText(SettingActivity.this, "프로필 수정 완료", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+            reference.child(fuser.getUid()).updateChildren(hashMap);
+            Toast.makeText(SettingActivity.this, "프로필 수정 완료", Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     // 기존의 사용자 정보를 ProfileFragment 로 부터 전달받아 화면에 출력한다.
@@ -328,14 +344,13 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         String image = intent.getStringExtra("image");
         String phone = intent.getStringExtra("phone");
 
-        Uri imguri = Uri.parse(image);
-        currentUri = imguri;
+        currentUri = image;
 
         if(image.equals("default")){
                 profile_image.setImageResource(R.drawable.default_img);
         }
         else{
-            Glide.with(SettingActivity.this).load(imguri).into(profile_image);
+            Glide.with(SettingActivity.this).load(image).into(profile_image);
         }
         profile_email.setText(email);
         profile_name.setText(name);

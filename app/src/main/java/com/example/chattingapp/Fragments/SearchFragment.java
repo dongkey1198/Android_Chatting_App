@@ -82,6 +82,7 @@ public class SearchFragment extends Fragment {
                     if(!user.getEmail().equals(firebaseUser.getEmail())){
                         mUsers.add(user);
                     }
+
                 }
 
                 userAdapter = new UserAdapter(getContext(), mUsers);

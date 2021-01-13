@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.example.chattingapp.MessageActivity;
 import com.example.chattingapp.Models.User;
 import com.example.chattingapp.R;
+import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Text;
 
@@ -55,6 +56,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             holder.profile_image.setImageResource(R.drawable.default_img);
         }
         else{
+            Log.d("mylog", "aaa: " + user.getImageURL());
             Glide.with(context).load(user.getImageURL()).into(holder.profile_image);
         }
 
