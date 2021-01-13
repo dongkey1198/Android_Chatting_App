@@ -47,6 +47,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         register = (Button) findViewById(R.id.register_button);
         register.setOnClickListener(this);
 
+        find_pwd.setOnClickListener(this);
+
         getLoginInfo();
 
     }// End of OnCreate
@@ -73,6 +75,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             case R.id.login_button:
                 userLogin();
+                break;
+
+            case R.id.find_pwd:
+                startActivity(new Intent(LoginActivity.this, ResetPwdActivity.class));
                 break;
         }
     }

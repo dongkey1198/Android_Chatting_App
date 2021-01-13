@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.chattingapp.LoginActivity;
 import com.example.chattingapp.R;
+import com.example.chattingapp.ResetPwdActivity;
 import com.example.chattingapp.SettingActivity;
 import com.example.chattingapp.Models.User;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -38,30 +39,19 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
 
-    private static final int IMAGE_REQUEST = 1;
-
-
-
-    private Button logout_btn, profile_edit_button;
+    private Button logout_btn, profile_edit_button, change_password;
     private TextView profile_email, profile_name, profile_age, profile_phone_num;
     private CircleImageView profile_image;
 
     private FirebaseUser fuser;
     private DatabaseReference reference;
 
-    private FirebaseStorage storage;
-    private StorageReference storageReference;
-    private StorageTask uploadTask;
-    private Uri imageUri;
-
     private String userID;
-
     private String user_email;
     private String user_name;
     private String user_age;
     private String user_image;
     private String user_phone_num;
-
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -88,6 +78,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         //프로필 수정
         profile_edit_button = (Button)view.findViewById(R.id.profile_edit_button);
         profile_edit_button.setOnClickListener(this);
+
+        //비밀번호 변경
+        change_password = (Button)view.findViewById(R.id.change_password);
+        change_password.setOnClickListener(this);
+
         //로그아웃
         logout_btn = (Button)view.findViewById(R.id.logout_button);
         logout_btn.setOnClickListener(this);
@@ -123,8 +118,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     else{
                         Glide.with(getActivity()).load(user_image).into(profile_image);
                     }
-
-
                     profile_name.setText(user_name);
                     profile_age.setText(user_age);
                     profile_email.setText(user_email);
@@ -167,10 +160,16 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
                 AlertDialog alterDialog = builder.create();
                 alterDialog.show();
+                break;
 
+            case R.id.change_password:
+                Intent reset = new Intent(getActivity(), ResetPwdActivity.class);
+                reset.putExtra("email", user_email);
+                startActivity(reset);
                 break;
 
             case R.id.profile_edit_button:
+
                 Intent intent = new Intent(getActivity(), SettingActivity.class);
                 intent.putExtra("email", user_email);
                 intent.putExtra("name", user_name);
