@@ -56,7 +56,7 @@
         android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="15dp"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
         android:text="이름: "
@@ -115,43 +115,59 @@
         android:textSize="20sp"
         android:layout_below="@+id/phone"/>
 
-
     <Button
-        android:id="@+id/profile_edit_button"
+        android:id="@+id/add_friend"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:layout_marginTop="15dp"
         android:backgroundTint="@color/main_color"
-        android:text="프로필 수정"
+        android:text="친구 추가"
+        android:textColor="@color/white"
+        android:layout_marginTop="20dp"
+        android:textSize="20sp"
+        android:layout_below="@+id/profile_phone" />
+
+    <Button
+        android:id="@+id/delete_friend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:backgroundTint="@color/main_color"
+        android:text="친구 추가"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:visibility="gone"
+        android:layout_below="@+id/profile_phone" />
+
+    <Button
+        android:id="@+id/send_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="70dp"
+        android:backgroundTint="@color/main_color"
+        android:text="메세지 보내기"
         android:textColor="@color/white"
         android:textSize="20sp"
         android:layout_below="@+id/profile_phone"/>
 
     <Button
-        android:id="@+id/change_password"
+        android:id="@+id/back_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
+        android:layout_marginTop="4dp"
         android:backgroundTint="@color/main_color"
-        android:text="비밀번호 변경"
+        android:text="돌아가기"
         android:textColor="@color/white"
         android:textSize="20sp"
-        android:layout_below="@+id/profile_edit_button"/>
+        android:layout_below="@+id/send_message"/>
 
-    <Button
-        android:id="@+id/logout_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:backgroundTint="@color/main_color"
-        android:text="로그아웃"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:layout_below="@+id/change_password"/>
+
 
 
 </RelativeLayout>

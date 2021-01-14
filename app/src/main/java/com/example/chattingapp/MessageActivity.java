@@ -45,7 +45,7 @@ public class MessageActivity extends AppCompatActivity {
 
    private CircleImageView profile_image;
    private TextView user_name;
-   private ImageButton send_button;
+   private ImageButton send_button, back_button;
    private EditText message;
 
    private FirebaseUser fuser;
@@ -57,6 +57,7 @@ public class MessageActivity extends AppCompatActivity {
    private List<Chat> mChat;
    private RecyclerView recyclerView;
 
+   private String userID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +68,7 @@ public class MessageActivity extends AppCompatActivity {
         user_name = (TextView)findViewById(R.id.user_name);
         message = (EditText)findViewById(R.id.message);
         send_button = (ImageButton)findViewById(R.id.send_button);
+        back_button = (ImageButton)findViewById(R.id.back_button);
 
         //체팅기록을 보여줄 RecylerView
         recyclerView = (RecyclerView)findViewById(R.id.recyler_view);
@@ -77,7 +79,7 @@ public class MessageActivity extends AppCompatActivity {
 
         //UserAdapter로 부터 받아온 사용자정보(***현재 어플을 사용자의 정보가아닌 메세지를 보내고자하는 사용자의 정보)
         intent = getIntent();
-        String userID = intent.getStringExtra("userID");
+        userID = intent.getStringExtra("userID");
         fuser = FirebaseAuth.getInstance().getCurrentUser();
 
         //메세지 전송하기
@@ -94,6 +96,13 @@ public class MessageActivity extends AppCompatActivity {
 
                 message.setText("");
 
+            }
+        });
+
+        back_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
 
@@ -134,6 +143,24 @@ public class MessageActivity extends AppCompatActivity {
         hashMap.put("message", message);
 
         databaseReference.child("Chats").push().setValue(hashMap);
+
+        DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("ChatList")
+                .child(fuser.getUid()).child(userID);
+
+        //add user for chat fragment
+        chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.exists()){
+                    chatRef.child("id").setValue(userID);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
     }
 

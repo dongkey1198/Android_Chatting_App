@@ -4,11 +4,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Fragments.ChatFragment">
+  <TextView
+      android:layout_width="match_parent"
+      android:layout_height="50dp"
+      android:background="@color/main_color"/>
 
+  <TextView
+      android:id="@+id/title"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="채팅목록"
+      android:textStyle="bold"
+      android:textColor="@color/white"
+      android:textSize="30sp"
+      android:layout_margin="5dp"
+      android:layout_marginTop="10dp"
+      android:gravity="center"/>
 
   <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/recyler_view"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"/>
+      android:layout_height="match_parent"
+      android:layout_below="@+id/title"/>
 
 </RelativeLayout>

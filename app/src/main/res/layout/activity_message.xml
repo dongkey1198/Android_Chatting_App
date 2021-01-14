@@ -18,16 +18,23 @@
             android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar"
             app:popupTheme="@style/menuStyle">
 
+            <ImageButton
+                android:id="@+id/back_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/ic_back"/>
+
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/profile_image"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
+                android:layout_marginLeft="20sp"
                 android:src="@drawable/default_img"/>
             <TextView
                 android:id="@+id/user_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
+                android:layout_marginLeft="10dp"
                 android:text="계정"
                 android:textSize="30sp"
                 android:textColor="@color/white"/>

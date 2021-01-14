@@ -7,12 +7,16 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
+import com.example.chattingapp.Adapter.ChatAdapter;
 import com.example.chattingapp.Adapter.UserAdapter;
 import com.example.chattingapp.Models.Chat;
+import com.example.chattingapp.Models.Chatlist;
 import com.example.chattingapp.Models.User;
 import com.example.chattingapp.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,13 +35,14 @@ public class ChatFragment extends Fragment {
 
     private RecyclerView recyclerView;
 
-    private UserAdapter userAdapter;
+    private ChatAdapter chatAdapter;
+    private List<Chatlist> userList;
     private List<User> mUser;
 
     private FirebaseUser fuser;
     private DatabaseReference reference;
 
-    private List<String> userList;
+
 
     public ChatFragment() {
         // Required empty public constructor
@@ -54,28 +59,19 @@ public class ChatFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         fuser = FirebaseAuth.getInstance().getCurrentUser();
-
         userList = new ArrayList<>();
 
-        reference = FirebaseDatabase.getInstance().getReference("Chats");
+        reference = FirebaseDatabase.getInstance().getReference("ChatList").child(fuser.getUid());
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 userList.clear();
-                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
-                    Chat chat = dataSnapshot.getValue(Chat.class);
 
-                    //사용자가 메시지를 보냈을때
-                    if(chat.getSender().equals(fuser.getUid())){
-                        userList.add(chat.getReceiver());
-                    }
-                    //사용자가 메시지를 받았을때때
-                   else if(chat.getReceiver().equals(fuser.getUid())){
-                        userList.add(chat.getSender());
-                    }
+                for(DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Chatlist chatlist = dataSnapshot.getValue(Chatlist.class);
+                    userList.add(chatlist);
                 }
-                readChats();
-
+                chatList();
             }
 
             @Override
@@ -87,38 +83,23 @@ public class ChatFragment extends Fragment {
         return  view;
     }
 
-    private void readChats() {
-
+    private void chatList() {
         mUser = new ArrayList<>();
         reference = FirebaseDatabase.getInstance().getReference("Users");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                mUser.clear(); // 0으로 초기화
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                mUser.clear();
+                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
                     User user = dataSnapshot.getValue(User.class);
-                    //중복된 값 해결
-                    for(String id : userList){
-                        if(user.getUserId().equals(id)){
-                            if(mUser.size() != 0){
-                                //중복 방지
-                                for( User user1 : mUser){
-                                    if(!user.getUserId().equals(user1.getUserId())){
-                                        mUser.add(user);
-                                    }
-                                }
-                            }
-                            else{
-                                mUser.add(user);
-                            }
+                    for(Chatlist chatlist : userList){
+                        if(user.getUserId().equals(chatlist.getId())) {
+                            mUser.add(user);
                         }
                     }
                 }
-
-                userAdapter = new UserAdapter(getContext(), mUser);
-                recyclerView.setAdapter(userAdapter);
-
-
+                chatAdapter = new ChatAdapter(getContext(), mUser);
+                recyclerView.setAdapter(chatAdapter);
             }
 
             @Override
@@ -126,6 +107,5 @@ public class ChatFragment extends Fragment {
 
             }
         });
-
     }
 }

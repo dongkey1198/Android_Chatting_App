@@ -22,4 +22,5 @@
         android:padding="10dp"
         android:background="@drawable/background_left"/>
 
+
 </RelativeLayout>

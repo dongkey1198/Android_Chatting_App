@@ -2,53 +2,43 @@ package com.example.chattingapp.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.chattingapp.MessageActivity;
 import com.example.chattingapp.Models.User;
 import com.example.chattingapp.R;
 import com.example.chattingapp.UserProfileActivity;
-import com.squareup.picasso.Picasso;
-
-import org.w3c.dom.Text;
 
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-// SearchFragment 로부터 전달받은 사용자들의 데이터를 다룬다.
-// 그리고 사용자가 SearchFragment에 뜬 사용자 목록중 하나를 선택할경우
-// MessageActivity에 그 목록에 해당되는 사용자 정보를 보내준다.
-
-public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
+public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder> {
 
     private Context context;
     private List<User> mUsers;
 
-    public UserAdapter(Context context, List<User> mUsers){
-        this.context = context;
+    public FriendAdapter(Context context, List<User> mUsers){
         this.mUsers = mUsers;
+        this.context = context;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public FriendAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View view = LayoutInflater.from(context).inflate(R.layout.user_item, parent, false);
-        return new UserAdapter.ViewHolder(view);
+        return new FriendAdapter.ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull FriendAdapter.ViewHolder holder, int position) {
         User user = mUsers.get(position);
         holder.username.setText(user.getName());
         holder.user_email.setText(user.getEmail());
