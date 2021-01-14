@@ -84,7 +84,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         String pwd = et_pwd.getText().toString().trim();
         String pwd2 = et_pwd_check.getText().toString().trim();
         String imageURL = "default";
-        String phone_num = "1";
+        String phone_num = "";
 
         if(email.isEmpty()){
             et_email.setError("이메일을 입력하세요!");

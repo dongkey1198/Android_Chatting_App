@@ -83,8 +83,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
 
     private FirebaseUser fuser;
     private StorageReference storageReference;
-    private StorageTask uploadTask;
-    //private Uri imageUri;
+
     private String currentUri;
     private String mUri;
 

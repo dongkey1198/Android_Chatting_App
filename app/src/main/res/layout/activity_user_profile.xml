@@ -135,8 +135,9 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:backgroundTint="@color/main_color"
-        android:text="친구 추가"
+        android:text="친구 삭제"
         android:textColor="@color/white"
+        android:layout_marginTop="20dp"
         android:textSize="20sp"
         android:visibility="gone"
         android:layout_below="@+id/profile_phone" />

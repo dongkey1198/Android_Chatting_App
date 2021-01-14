@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -21,16 +22,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.EventListener;
+import java.util.HashMap;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener {
 
     private TextView profile_email, profile_name, profile_age, profile_phone_num;
     private CircleImageView profile_image;
-    private Button sned_message, add_friend_btn, delete_friend_btn, back_button;
+    private Button sned_message, add_friend_btn, delete_friend_btn,back_button;
 
     private Intent intent;
     private String userId;
+    private boolean flag;
 
     private FirebaseUser fuser;
     private DatabaseReference reference;
@@ -62,6 +67,37 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         fuser = FirebaseAuth.getInstance().getCurrentUser();
 
         getUserData();
+        getButtonText();
+    }
+
+    private void getButtonText() {
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Friends").child(fuser.getUid());
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
+                    Friend f = dataSnapshot.getValue(Friend.class);
+                    if(f.getId().equals(userId)){
+                        flag = true;
+                        add_friend_btn.setVisibility(View.GONE);
+                    }
+                }
+
+                if(flag == true){
+                    delete_friend_btn.setVisibility(View.VISIBLE);
+                }
+                else{
+                    add_friend_btn.setVisibility(View.VISIBLE);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void getUserData() {
@@ -96,7 +132,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onClick(View v) {
-
+        Log.d("tag","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa switch start");
         switch (v.getId()){
             case R.id.back_button:
                 finish();
@@ -109,23 +145,28 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 break;
 
             case R.id.add_friend:
-
-                DatabaseReference friendRef = FirebaseDatabase.getInstance().getReference("Friends")
-                        .child(fuser.getUid()).child(userId);
-                friendRef.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if(!snapshot.exists()){
-                            friendRef.child("id").setValue(userId);
-                            Toast.makeText(UserProfileActivity.this, "친구 추가 완료...", Toast.LENGTH_SHORT).show();
-                        }
+                if(flag == false){
+                    DatabaseReference friendRef = FirebaseDatabase.getInstance().getReference();
+                    HashMap<String, Object> hashMap = new HashMap<>();
+                    hashMap.put("id", userId);
+                    friendRef.child("Friends").child(fuser.getUid()).child(userId).setValue(hashMap);
+                    flag = true;
+                    if(flag == true){
+                        add_friend_btn.setVisibility(View.GONE);
                     }
+                }
+                break;
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
+            case R.id.delete_friend:
 
-                    }
-                });
+                DatabaseReference friendRef = FirebaseDatabase.getInstance().getReference("Friends").child(fuser.getUid());
+                friendRef.child(userId).removeValue();
+                Toast.makeText(UserProfileActivity.this, "친구 삭제 완료...", Toast.LENGTH_SHORT).show();
+                delete_friend_btn.setVisibility(View.GONE);
+                flag = false;
+                if(flag == false){
+                    add_friend_btn.setVisibility(View.VISIBLE);
+                }
                 break;
 
         }

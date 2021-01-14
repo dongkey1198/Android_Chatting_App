@@ -146,7 +146,6 @@ public class MessageActivity extends AppCompatActivity {
 
         DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("ChatList")
                 .child(fuser.getUid()).child(userID);
-
         //add user for chat fragment
         chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
