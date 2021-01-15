@@ -132,7 +132,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onClick(View v) {
-        Log.d("tag","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa switch start");
         switch (v.getId()){
             case R.id.back_button:
                 finish();
@@ -150,6 +149,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     HashMap<String, Object> hashMap = new HashMap<>();
                     hashMap.put("id", userId);
                     friendRef.child("Friends").child(fuser.getUid()).child(userId).setValue(hashMap);
+                    Toast.makeText(UserProfileActivity.this, "친구 추가 완료...", Toast.LENGTH_SHORT).show();
                     flag = true;
                     if(flag == true){
                         add_friend_btn.setVisibility(View.GONE);

@@ -7,16 +7,12 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 
 import com.example.chattingapp.Adapter.ChatAdapter;
-import com.example.chattingapp.Adapter.UserAdapter;
 import com.example.chattingapp.Models.Chat;
-import com.example.chattingapp.Models.Chatlist;
 import com.example.chattingapp.Models.User;
 import com.example.chattingapp.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,7 +23,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +31,7 @@ public class ChatFragment extends Fragment {
     private RecyclerView recyclerView;
 
     private ChatAdapter chatAdapter;
-    private List<Chatlist> userList;
+    private List<String> messageList;
     private List<User> mUser;
 
     private FirebaseUser fuser;
@@ -59,19 +54,25 @@ public class ChatFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         fuser = FirebaseAuth.getInstance().getCurrentUser();
-        userList = new ArrayList<>();
+        messageList = new ArrayList<>();
 
-        reference = FirebaseDatabase.getInstance().getReference("ChatList").child(fuser.getUid());
+        reference = FirebaseDatabase.getInstance().getReference("Chats");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                userList.clear();
-
+                messageList.clear();
                 for(DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                    Chatlist chatlist = dataSnapshot.getValue(Chatlist.class);
-                    userList.add(chatlist);
+                    Chat chat = dataSnapshot.getValue(Chat.class);
+
+                    assert chat != null;
+                    if (chat.getSender().equals(fuser.getUid())){
+                        messageList.add(chat.getReceiver());
+                    }
+                    else if (chat.getReceiver().equals(fuser.getUid())){
+                        messageList.add(chat.getSender());
+                    }
                 }
-                chatList();
+                getChat();
             }
 
             @Override
@@ -83,19 +84,32 @@ public class ChatFragment extends Fragment {
         return  view;
     }
 
-    private void chatList() {
+    private void getChat() {
+
         mUser = new ArrayList<>();
         reference = FirebaseDatabase.getInstance().getReference("Users");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                mUser.clear();
-                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
+                mUser.clear(); // 0으로 초기화
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()){
                     User user = dataSnapshot.getValue(User.class);
-                    for(Chatlist chatlist : userList){
-                        if(user.getUserId().equals(chatlist.getId())) {
-                            mUser.add(user);
+
+                    for(String id : messageList){
+                        if(user.getUserId().equals(id)){
+                            if(mUser.size() != 0){
+                                for(User u : mUser){
+                                    //중복방지
+                                    if(!user.getUserId().equals(u.getUserId())){
+                                        mUser.add(user);
+                                    }
+                                }
+                            }
+                            else{
+                                mUser.add(user);
+                            }
                         }
+
                     }
                 }
                 chatAdapter = new ChatAdapter(getContext(), mUser);
@@ -107,5 +121,8 @@ public class ChatFragment extends Fragment {
 
             }
         });
+
     }
+
+
 }

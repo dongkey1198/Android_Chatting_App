@@ -144,23 +144,6 @@ public class MessageActivity extends AppCompatActivity {
 
         databaseReference.child("Chats").push().setValue(hashMap);
 
-        DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("ChatList")
-                .child(fuser.getUid()).child(userID);
-        //add user for chat fragment
-        chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(!snapshot.exists()){
-                    chatRef.child("id").setValue(userID);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
     }
 
     //모든 메세지 내용을 읽어온다.
