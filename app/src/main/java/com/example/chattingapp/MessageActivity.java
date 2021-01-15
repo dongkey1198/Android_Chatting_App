@@ -181,6 +181,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     private void getImageDialog() {
+
         dialog = new Dialog(MessageActivity.this);
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
@@ -274,17 +275,18 @@ public class MessageActivity extends AppCompatActivity {
             Uri contentUri = data.getData();
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
             String imageFileName = "JPEG_" + timeStamp + "." + getFileExt(contentUri);
-
             uploadImageToFirebase(imageFileName, contentUri);
+            dialog.dismiss();
         }
         else if(requestCode == CAMERA_REQUEST_CODE){
             if(resultCode == Activity.RESULT_OK){
                 File f = new File(currentPhotoPath);
                 Uri contentUri = Uri.fromFile(f);
                 uploadImageToFirebase(f.getName(), contentUri);
+                dialog.dismiss();
             }
         }
-        dialog.dismiss();
+
 
     }
 
@@ -306,8 +308,11 @@ public class MessageActivity extends AppCompatActivity {
         });
 
     }
+
     //이미지 전송하기
     private void sendImage() {
+
+
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Chats");
         HashMap<String,Object> hashMap = new HashMap<>();
         hashMap.put("sender", fuser.getUid());
@@ -351,6 +356,8 @@ public class MessageActivity extends AppCompatActivity {
     //보낸 메세지 데이터베이스에 저장
     private void sendMessage(String sender, String receiver, String message){
 
+
+
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
         HashMap<String, Object> hashMap = new HashMap<>();
@@ -358,6 +365,7 @@ public class MessageActivity extends AppCompatActivity {
         hashMap.put("receiver", receiver);
         hashMap.put("message", message);
         hashMap.put("type", "string");
+
 
         databaseReference.child("Chats").push().setValue(hashMap);
 

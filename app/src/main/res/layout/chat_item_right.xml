@@ -8,15 +8,19 @@
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:padding="8dp"
-        android:layout_alignParentRight="true">
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="1dp"
+        android:layout_marginRight="1dp"
+        android:padding="8dp">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profile_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:src="@drawable/default_img"/>
+            android:src="@drawable/default_img"
+            android:visibility="gone" />
+
+
 
         <TextView
             android:id="@+id/show_message"
@@ -24,10 +28,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:background="@drawable/background_right"
+            android:padding="10dp"
             android:text="message"
             android:textColor="@color/white"
-            android:textSize="20sp"
-            android:padding="10dp"/>
+            android:textSize="20sp" />
 
         <ImageView
             android:id="@+id/image_message"
@@ -35,10 +39,10 @@
             android:layout_height="250dp"
             android:layout_alignParentEnd="true"
             android:background="@drawable/background_right"
-            android:visibility="gone"/>
-
+            android:visibility="gone" />
 
 
     </RelativeLayout>
+
 
 </RelativeLayout>

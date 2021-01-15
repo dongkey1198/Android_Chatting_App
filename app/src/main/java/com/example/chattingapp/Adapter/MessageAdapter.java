@@ -2,6 +2,7 @@ package com.example.chattingapp.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,8 @@ import com.example.chattingapp.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -74,8 +77,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             holder.show_message.setText(chat.getMessage());
         }
 
-
-
         if(imageurl.equals("default")){
             holder.profile_image.setImageResource(R.drawable.default_img);
         }
@@ -86,6 +87,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     }
 
+
     @Override
     public int getItemCount() {
         return mChats.size();
@@ -93,15 +95,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView show_message;
+        public TextView show_message, date_time;
         public CircleImageView profile_image;
         public ImageView msg_img;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            show_message = (TextView) itemView.findViewById(R.id.show_message);
-            profile_image = (CircleImageView) itemView.findViewById(R.id.profile_image);
+            show_message = (TextView)itemView.findViewById(R.id.show_message);
+            date_time = (TextView)itemView.findViewById(R.id.data_time);
+            profile_image = (CircleImageView)itemView.findViewById(R.id.profile_image);
             msg_img = (ImageView)itemView.findViewById(R.id.image_message);
 
         }

@@ -7,6 +7,7 @@ public class Chat {
     private String message;
     private String type;
 
+
     public Chat() {}
 
     public Chat(String sender, String receiver, String message, String type) {
@@ -14,6 +15,7 @@ public class Chat {
         this.receiver = receiver;
         this.message = message;
         this.type = type;
+
     }
 
     public String getSender() {
@@ -47,4 +49,6 @@ public class Chat {
     public void setType(String type) {
         this.type = type;
     }
+
+
 }
