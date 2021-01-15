@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -60,8 +61,20 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public void onBindViewHolder(@NonNull MessageAdapter.ViewHolder holder, int position) {
 
         Chat chat = mChats.get(position);
+        String type = chat.getType();
 
-        holder.show_message.setText(chat.getMessage());
+        if (type.equals("image")){
+            holder.show_message.setVisibility(View.GONE);
+            holder.msg_img.setVisibility(View.VISIBLE);
+            Glide.with(context).load(chat.getMessage()).into(holder.msg_img);
+        }
+        else{
+            holder.show_message.setVisibility(View.VISIBLE);
+            holder.msg_img.setVisibility(View.GONE);
+            holder.show_message.setText(chat.getMessage());
+        }
+
+
 
         if(imageurl.equals("default")){
             holder.profile_image.setImageResource(R.drawable.default_img);
@@ -82,12 +95,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
         public TextView show_message;
         public CircleImageView profile_image;
+        public ImageView msg_img;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             show_message = (TextView) itemView.findViewById(R.id.show_message);
             profile_image = (CircleImageView) itemView.findViewById(R.id.profile_image);
+            msg_img = (ImageView)itemView.findViewById(R.id.image_message);
 
         }
     }
