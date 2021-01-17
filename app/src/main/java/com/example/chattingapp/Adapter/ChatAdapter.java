@@ -113,7 +113,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                     last_message.append("메세지가 없습니다.");
                 }
                 else{
-                    last_message.append(lastMessage);
+                    if (lastMessage.contains("file://") || lastMessage.contains("content://")){
+                        last_message.append("이미지");
+                    }
+                    else{
+                        last_message.append(lastMessage);
+                    }
                 }
 
                 lastMessage = "default";

@@ -17,7 +17,7 @@ import com.example.chattingapp.MessageActivity;
 import com.example.chattingapp.Models.User;
 import com.example.chattingapp.R;
 import com.example.chattingapp.UserProfileActivity;
-import com.squareup.picasso.Picasso;
+
 
 import org.w3c.dom.Text;
 

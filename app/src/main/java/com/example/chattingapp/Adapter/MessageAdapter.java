@@ -95,7 +95,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView show_message, date_time;
+        public TextView show_message;
         public CircleImageView profile_image;
         public ImageView msg_img;
 
@@ -103,7 +103,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
             super(itemView);
 
             show_message = (TextView)itemView.findViewById(R.id.show_message);
-            date_time = (TextView)itemView.findViewById(R.id.data_time);
             profile_image = (CircleImageView)itemView.findViewById(R.id.profile_image);
             msg_img = (ImageView)itemView.findViewById(R.id.image_message);
 
