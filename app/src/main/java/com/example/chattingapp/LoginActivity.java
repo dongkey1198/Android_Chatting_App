@@ -112,22 +112,18 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                 if(task.isSuccessful()){
 
-//                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-//
-//                    if(user.isEmailVerified()){
-//                        Toast.makeText(LoginActivity.this, "성공적으로 로그인 하였습니다.", Toast.LENGTH_SHORT).show();
-//                        progressBar.setVisibility(View.GONE);
-//                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
-//                    }
-//                    else{
-//                        user.sendEmailVerification();
-//                        Toast.makeText(LoginActivity.this, "이메일 인증이 필요합니다.", Toast.LENGTH_SHORT).show();
-//                        progressBar.setVisibility(View.GONE);
-//                    }
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-                    Toast.makeText(LoginActivity.this, "성공적으로 로그인 하였습니다.", Toast.LENGTH_SHORT).show();
-                    progressBar.setVisibility(View.GONE);
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    if(user.isEmailVerified()){
+                        Toast.makeText(LoginActivity.this, "성공적으로 로그인 하였습니다.", Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.GONE);
+                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    }
+                    else{
+                        user.sendEmailVerification();
+                        Toast.makeText(LoginActivity.this, "이메일 인증이 필요합니다.", Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.GONE);
+                    }
 
                 }
                 else{

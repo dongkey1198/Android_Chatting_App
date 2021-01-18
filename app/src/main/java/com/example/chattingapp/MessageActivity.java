@@ -27,7 +27,6 @@ import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +34,7 @@ import com.bumptech.glide.Glide;
 import com.example.chattingapp.Adapter.MessageAdapter;
 import com.example.chattingapp.Models.Chat;
 import com.example.chattingapp.Models.User;
+
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -72,6 +72,7 @@ public class MessageActivity extends AppCompatActivity {
     public static final int CAMERA_REQUEST_CODE = 102;
     public static final int GALLERY_REQUEST_CODE = 103;
     public static final int REQUEST_CODE_STORAGE_PERMISSION = 104;
+
 
     private CircleImageView profile_image;
     private TextView user_name;
@@ -356,8 +357,6 @@ public class MessageActivity extends AppCompatActivity {
     //보낸 메세지 데이터베이스에 저장
     private void sendMessage(String sender, String receiver, String message){
 
-
-
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
         HashMap<String, Object> hashMap = new HashMap<>();
@@ -370,6 +369,8 @@ public class MessageActivity extends AppCompatActivity {
         databaseReference.child("Chats").push().setValue(hashMap);
 
     }
+
+
 
     //모든 메세지 내용을 읽어온다.
     private void readMessage(String myid, String userid, String imageurl){

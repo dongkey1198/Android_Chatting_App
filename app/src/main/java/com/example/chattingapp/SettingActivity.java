@@ -197,8 +197,8 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
 
         if(requestCode == CAMERA_REQUEST_CODE){
             if(resultCode == Activity.RESULT_OK){
-                File f = new File(currentPhotoPath);
 
+                File f = new File(currentPhotoPath);
                 profile_image.setImageURI(Uri.fromFile(f));
                 Uri contentUri = Uri.fromFile(f);
                 //imageUri = contentUri;
